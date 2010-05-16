@@ -4,7 +4,13 @@
 
 int is_valid_utf16_atom( const uint16_t * chr )
 {
-	//TODO
+	//http://unicode.org/faq/utf_bom.html#utf16-7
+	if ( *chr == 0xFFFF || *chr == 0xFFFE || ( *chr >= 0xFDD0 && *chr <= 0xFDEF ) ) 
+		return 1 == 2;
+	if ( ( *chr >= 0xD800 && *chr <= 0xDBFF ) && ( *(chr+1) < 0xDC00 || *(chr+1) > 0xDFFF ) )
+		return 1 == 2;
+	if ( ( *chr >= 0xDC00 && *chr <= 0xDFFF ) && ( *(chr-1) < 0xD800 || *(chr-1) > 0xDBFF ) )
+		return 1 == 2;
 	return 1 == 1;
 }
 
@@ -40,7 +46,7 @@ unsigned int utf16le_to_utf8( const uint16_t * source, uint8_t * dest, const uns
             dest[cur_pos++] = (uint8_t)(((source[offset] >> 6) & 0x3f)   | 0x80);
             dest[cur_pos++] = (uint8_t)((source[offset] & 0x3f)          | 0x80);
         }
-        else 
+        else //TODO: two words sequence 
         if ( cur_pos + 3 < dest_size )
         {      
             dest[cur_pos++] = (uint8_t)((source[offset] >> 18)           | 0xf0);
