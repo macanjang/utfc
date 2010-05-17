@@ -47,6 +47,8 @@ int main(int argc, char ** argv)
 	free(utf8_str);
 	//todo - write test cases*/
 	
+	int i = 0;	
+	
 	printf("%d\n", sizeof( int ));
 	printf("UINT_MAX %X\n", UINT_MAX);
 	
@@ -66,12 +68,24 @@ int main(int argc, char ** argv)
 	else
 		printf("converted string %s, bytes used %d \n", utf8_str, used); 
 	
+	if ( utf8_to_utf16( utf8_str, utf16_str_le, 5, &used, 0 ) != RET_OK )
+		printf("failed\n");
+	else
+	{
+		printf("ok, bytes used %d \n", used);
+		for ( ; i < used ; i++ )
+		{
+			printf("%X ", utf16_str_le[i]);
+		}
+		printf("\n");
+	}
+	
 	if  ( utf16be_to_utf8( (uint16_t*)utf16_str_be, utf8_str, 5, &used) != RET_OK )
 		printf("failed\n");
 	else
 		printf("converted string %s, bytes used %d \n", utf8_str, used); 
 	
-	
+	utf8_to_utf16( utf8_str, utf16_str_le, 5, &used, 0 );
 	
 	
 	if  ( utf16le_to_utf8( (uint16_t*)utf16_str_le1, utf8_str, 5, &used) != RET_OK )
@@ -85,6 +99,17 @@ int main(int argc, char ** argv)
 		printf("converted string %s, bytes used %d \n", utf8_str, used); 
 	
 	
+	if ( utf8_to_utf16( utf8_str, utf16_str_le, 5, &used, 0 ) != RET_OK )
+		printf("failed\n");
+	else
+	{
+		printf("ok, bytes used %d \n", used);
+		for ( i = 0; i < used ; i++ )
+		{
+			printf("%X ", utf16_str_le[i]);
+		}
+		printf("\n");
+	}
 	free( utf8_str );
 	return 0;
 }

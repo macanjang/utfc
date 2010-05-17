@@ -6,8 +6,6 @@
 int is_valid_utf16_atom( const uint16_t * chr )
 {
 	//http://unicode.org/faq/utf_bom.html#utf16-7 
-	//if ( *chr == 0xFFFF || *chr == 0xFFFE || ( *chr >= 0xFDD0 && *chr <= 0xFDEF ) )  //this chars are not printable, but valid
-	//	return 1 == 2;
 	if ( ( *chr >= LEAD_SURROGATE_MIN  && *chr <= LEAD_SURROGATE_MAX ) && ( *(chr+1) < TRAIL_SURROGATE_MIN  || *(chr+1) > TRAIL_SURROGATE_MAX ) )
 		return 1 == 2;
 	
@@ -39,73 +37,46 @@ uint32_t utf16be_code_point( const uint16_t * chr )
 }
 
 
-unsigned int utf8_to_utf16( const uint8_t * source, uint16_t * dest, 
-unsigned int dest_size, unsigned int * bytes_used, const char to_be )
+unsigned int utf8_to_utf16( const uint8_t * source, uint16_t * dest, unsigned int dest_size, unsigned int * bytes_used, const char to_be )
 {
-        //TODO
         unsigned int offset = 0;
 		unsigned int cur_pos = 0;
 		uint32_t cp;
-        while ( *(source + offset) != UTF8_EOL )
+		int i = 0;
+		while ( *(source + offset) != UTF8_EOL )
         {
 			if ( offset == UINT_MAX )
 				return RET_STRING_TOO_BIG;
 			
-			if ( (*(source + offset) & 0xC0) == 0xC0 ) //we 
-have more then one byte
+			if ( (*(source + offset) & 0xF0) == 0xF0 ) // 4 bytes sequence
 			{
-				if ( (*(source + offset) & 0xE0) == 0xE0 
-) // 3 bytes sequence
-				{
-					//calc code point from 3 bytes
-					if ( ( (*(source + offset + 1) & 
-0x80 ) != 0x80 ) && ( (*(source + offset + 2) & 0x80 ) != 0x80 ) ) 
-//second or third byte has no marker 
-						return RET_INVALID_UTF8;	
-					
-					cp = ( ( ( (*( source + offset ) 
-& 0xF) << 4) | ( ( *(source + offset + 1) & 0x3C ) >> 2 ) ) << 8 ) | ( ( 
-( *(source + offset + 1) & 0x3 ) << 6 ) | ( *(source + offset + 2) & 
-0x3F )  ) ;
-					offset+=3;
-				}
-				else
-				if ( (*(source + offset) & 0xF0) == 0xF0 
-) // 4 bytes sequence
-				{
-					//calc code point from 4 bytes
-					if ( ( (*(source + offset + 1) & 
-0x80 ) != 0x80 ) && ( (*(source + offset + 2) & 0x80 ) != 0x80 ) && ( 
-(*(source + offset + 3) & 0x80 ) != 0x80 ) ) //second or third byte has 
-no marker 
-						return RET_INVALID_UTF8;	
-
-					cp = ( ( ( ( ( *(source + 
-offset) & 0x7 ) << 2 ) | ( ( *(source + offset + 1) & 0x30 ) >> 4 ) ) ) 
-<< 16 ) | 
-						 ( (  ( ( *(source + 
-offset + 1) & 0xF ) << 4 ) | ( ( *(source + offset + 2) & 0x3C ) >> 2 )      
-) << 8 )  | 
-						 ( ( ( *(source + offset 
-+ 2) & 0x3 ) << 6 ) | ( *(source + offset + 2) & 0x3F ) );
-					//TODO: test this!
-				}
-				else // 2 bytes sequence
-				{
-					//TODO: check for overlong 
-sequence
-					//calc code point from 2 bytes	
-					if ( (*(source + offset + 1) & 
-0x80 ) != 0x80 ) //second byte has no marker 
-						return RET_INVALID_UTF8;
-					cp = (((*(source + offset) & 
-0x1F ) >> 2 ) << 8 ) | ( ( (*(source + offset )  & 0x3) << 6 ) | ( 
-*(source + offset + 1) & 0x3F ) );
-					offset+=2;
-					if ( cp <= 127 ) //overlong 
-sequence
-						return RET_INVALID_UTF8;
-				}
+				//calc code point from 4 bytes
+				if ( ( (*(source + offset + 1) & 0x80 ) != 0x80 ) && ( (*(source + offset + 2) & 0x80 ) != 0x80 ) && ( (*(source + offset + 3) & 0x80 ) != 0x80 ) ) //second or third byte has no marker 
+					return RET_INVALID_UTF8;	
+				cp = ( ( ( ( ( *(source + offset) & 0x7 ) << 2 ) | ( ( *(source + offset + 1) & 0x30 ) >> 4 ) ) ) << 16 ) | 
+						 ( (  ( ( *(source + offset + 1) & 0xF ) << 4 ) | ( ( *(source + offset + 2) & 0x3C ) >> 2 )  ) << 8 )  | 
+						 ( ( ( *(source + offset + 2) & 0x3 ) << 6 ) | ( *(source + offset + 3) & 0x3F ) );
+				offset+=4;
+			} 
+			else
+			if ( (*(source + offset) & 0xE0) == 0xE0 ) // 3 bytes sequence
+			{
+				//calc code point from 3 bytes
+				if ( ( (*(source + offset + 1) & 0x80 ) != 0x80 ) && ( (*(source + offset + 2) & 0x80 ) != 0x80 ) )  //second or third byte has no marker 
+					return RET_INVALID_UTF8;	
+				cp = ( ( ( (*( source + offset ) & 0xF) << 4) | ( ( *(source + offset + 1) & 0x3C ) >> 2 ) ) << 8 ) | ( ( *(source + offset + 1) & 0x3 ) << 6 ) | ( *(source + offset + 2) & 0x3F )  ;
+				offset+=3;
+			}
+			else // 2 bytes sequence
+			if ( ( *(source + offset ) & 0xC0 ) == 0xC0 )
+			{
+				//calc code point from 2 bytes	
+				if ( (*(source + offset + 1) & 0x80 ) != 0x80 ) //second byte has no marker 
+					return RET_INVALID_UTF8;
+				cp = (((*(source + offset) & 0x1F ) >> 2 ) << 8 ) | ( ( (*(source + offset )  & 0x3) << 6 ) | ( *(source + offset + 1) & 0x3F ) );
+				offset+=2;
+				if ( cp <= 127 ) //overlong sequence
+					return RET_INVALID_UTF8;
 			}
 			else // ASCII char?
 			if ( *( source + offset ) <= 127 )
@@ -118,11 +89,14 @@ sequence
 			//encode codepoint 
 			if ( cp > 0xFFFF ) //two words sequence
 			{
-				printf("big cp %d\n", cp);
+				//printf("big cp %X\n", cp);
+				//TODO: make surrogate pair
+				//TODO: le/be
 			}
 			else 
 			{
 				dest[cur_pos++] = cp;
+				//TODO: le/be
 			}
 			if ( cur_pos >= dest_size )
 				return RET_BUFFER_OVERFLOW;
@@ -138,7 +112,7 @@ unsigned int utf16_to_utf8( const uint16_t * source, uint8_t * dest, const unsig
 {
 	unsigned int cur_pos = 0;
 	unsigned int offset = 0;
-	unisgned int rez = 0;
+	unsigned int rez = 0;
 	uint32_t cp;
 	int i = 0;
 	
@@ -156,7 +130,6 @@ unsigned int utf16_to_utf8( const uint16_t * source, uint8_t * dest, const unsig
 			cp = utf16le_code_point( &source[offset++] );
 		else 
 			cp = utf16be_code_point( &source[offset++] );
-		printf( "code point %X \n", cp );
 		if ( cp > 0xFFFF )
 			offset++;
 		
