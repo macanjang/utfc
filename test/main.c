@@ -14,9 +14,11 @@
 
 #include <string.h>
 
+#include <limits.h>
+
 int main(int argc, char ** argv)
-{
-	FILE * f = fopen("test-utf16.txt", "r");
+{ 
+	/*FILE * f = fopen("test-utf16.txt", "r");
 	if ( !f )
 	  return 1;
 	struct stat st;
@@ -43,6 +45,46 @@ int main(int argc, char ** argv)
 	
 	fclose(f);
 	free(utf8_str);
-	//todo - write test cases
+	//todo - write test cases*/
+	
+	printf("%d\n", sizeof( int ));
+	printf("UINT_MAX %X\n", UINT_MAX);
+	
+	uint8_t  utf16_str_le[] = { 0x34, 0xD8, 0x1E, 0xDD, 0, 0 };
+	//uint16_t  utf16_str_le[] = { 0xD834, 0xDD1E, 0 };
+	
+	uint8_t  utf16_str_be[] = { 0xD8, 0x34, 0xDD, 0x1E, 0, 0 };
+	
+	
+	uint16_t  utf16_str_le1[] = { 0x6C34, 0 };
+	uint8_t  utf16_str_be1[] = { 0x6C, 0x34, 0, 0 };
+
+	char * utf8_str = malloc( 5 );
+	unsigned int used;
+	if  ( utf16le_to_utf8( (uint16_t*)utf16_str_le, utf8_str, 5, &used) != RET_OK )
+		printf("failed\n");
+	else
+		printf("converted string %s, bytes used %d \n", utf8_str, used); 
+	
+	if  ( utf16be_to_utf8( (uint16_t*)utf16_str_be, utf8_str, 5, &used) != RET_OK )
+		printf("failed\n");
+	else
+		printf("converted string %s, bytes used %d \n", utf8_str, used); 
+	
+	
+	
+	
+	if  ( utf16le_to_utf8( (uint16_t*)utf16_str_le1, utf8_str, 5, &used) != RET_OK )
+		printf("failed\n");
+	else
+		printf("converted string %s, bytes used %d \n", utf8_str, used); 
+	
+	if  ( utf16be_to_utf8( (uint16_t*)utf16_str_be1, utf8_str, 5, &used) != RET_OK )
+		printf("failed\n");
+	else
+		printf("converted string %s, bytes used %d \n", utf8_str, used); 
+	
+	
+	free( utf8_str );
 	return 0;
 }
