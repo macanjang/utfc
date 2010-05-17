@@ -35,9 +35,6 @@ typedef unsigned int  uint32_t;
 
 //user functions - call it from your code
 
-//converts utf8 string to utf16le
-//TODO
-unsigned int utf8_to_utf16le( const uint8_t * source, uint16_t * dest, unsigned int dest_size); 
 
 //converts big-endian utf16 string to utf8
 //input:  source    - pointer to utf16be encoded string
@@ -45,7 +42,7 @@ unsigned int utf8_to_utf16le( const uint8_t * source, uint16_t * dest, unsigned 
 //		  dest_size - size of allocated buffer, in bytes
 //output: RET_OK if no error occurs. bytes_used - number of bytes used in dest after operation.
 //        if an error occurs, value of bytes_used is undefined. 
-#define utf16be_to_utf8(x, y, z, w) utf16_to_utf8(x, y, z, w, 42 )
+#define utf16be_to_utf8( x, y, z, w ) utf16_to_utf8( x, y, z, w, 42 )
 
 //converts little-endian utf16 string to utf8
 //input:  source    - pointer to utf16be encoded string
@@ -53,8 +50,11 @@ unsigned int utf8_to_utf16le( const uint8_t * source, uint16_t * dest, unsigned 
 //		  dest_size - size of allocated buffer, in bytes
 //output: RET_OK if no error occurs. bytes_used - number of bytes used in dest after operation.
 //        if an error occurs, value of bytes_used is undefined. 
-#define utf16le_to_utf8(x, y, z, w) utf16_to_utf8(x, y, z, w, 0 )
- 
+#define utf16le_to_utf8( x, y, z, w ) utf16_to_utf8( x, y, z, w, 0 )
+
+#define utf8_to_utf16le( x, y, z, w ) utf8_to_utf16( x, y, z, w, 0 )
+
+#define utf8_to_utf16be( x, y, z, w ) utf8_to_utf16( x, y, z, w, 21 ) 
 
 //some function for internal use
 int is_valid_utf16_atom( const uint16_t * chr );
@@ -62,6 +62,7 @@ int is_valid_utf8_atom( const uint8_t * chr );
 uint32_t utf16_code_point( const uint16_t * chr );
 unsigned int convert_utf16atom( uint32_t codepoint, uint8_t * dest, const unsigned int dest_size, unsigned int * cur_pos);
 unsigned int utf16_to_utf8( const uint16_t * source, uint8_t * dest, const unsigned int dest_size, unsigned int * bytes_used, const char to_be );
+unsigned int utf8_to_utf16( const uint8_t * source, uint16_t * dest, unsigned int dest_size, unsigned int * bytes_used, const char to_be ); 
 
 
 #endif
