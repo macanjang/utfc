@@ -89,14 +89,24 @@ unsigned int utf8_to_utf16( const uint8_t * source, uint16_t * dest, unsigned in
 			//encode codepoint 
 			if ( cp > 0xFFFF ) //two words sequence
 			{
-				//printf("big cp %X\n", cp);
-				//TODO: make surrogate pair
-				//TODO: le/be
+					if ( to_be == 0 ) 
+					{
+						dest[cur_pos+1] = LEAD_SURROGATE_MIN + ( ( cp - 0x10000 ) >> 10 );  //first word, little-endian notation!
+						dest[cur_pos]   = TRAIL_SURROGATE_MIN + ( ( cp - 0x10000 ) & 0x3FF ); //second word
+					}
+					else
+					{
+						dest[cur_pos] =  be_to_le ( LEAD_SURROGATE_MIN + ( ( cp - 0x10000 ) >> 10 ) );  //first word, big-endian notation!
+						dest[cur_pos + 1]   = be_to_le( TRAIL_SURROGATE_MIN + ( ( cp - 0x10000 ) & 0x3FF ) ); //second word
+					}
+					cur_pos+=2;
 			}
 			else 
 			{
-				dest[cur_pos++] = cp;
-				//TODO: le/be
+					if ( to_be == 0 ) //little endian
+						dest[cur_pos++] = cp;
+					else
+						dest[cur_pos++] = be_to_le( cp );
 			}
 			if ( cur_pos >= dest_size )
 				return RET_BUFFER_OVERFLOW;
