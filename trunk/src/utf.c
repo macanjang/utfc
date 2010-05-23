@@ -1,3 +1,31 @@
+/*Copyright (c) 2010, Dzianis Barzakouski, PDTec AG
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright 
+notice, this list of conditions and the following disclaimer in the 
+documentation and/or other materials provided with the distribution.
+3. Neither the name of the PDTec AG nor the names of its contributors 
+may be used to endorse or promote products derived from this software
+without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
 #include "utf/utf.h"
 
 #include <stdio.h>
@@ -164,23 +192,23 @@ unsigned int convert_utf16atom( uint32_t codepoint, uint8_t * dest, const unsign
 	else
 	if ( codepoint < 0x800 && *cur_pos + 1 < dest_size  )
 	{
-		dest[(*cur_pos)++] = (uint8_t)(( codepoint >> 6 )            | 0xc0);
-        dest[(*cur_pos)++] = (uint8_t)(( codepoint & 0x3f )          | 0x80);
+		dest[(*cur_pos)++] = (uint8_t)(( codepoint >> 6 ) | 0xc0);
+        dest[(*cur_pos)++] = (uint8_t)(( codepoint & 0x3f ) | 0x80);
 	}
 	else 
 	if ( codepoint < 0x10000 && *cur_pos + 2 < dest_size ) 
 	{              
-    	dest[(*cur_pos)++] = (uint8_t)((  codepoint >> 12 )           | 0xe0);
-        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 6 ) & 0x3f)    | 0x80);
-        dest[(*cur_pos)++] = (uint8_t)((  codepoint & 0x3f )          | 0x80);
+    	dest[(*cur_pos)++] = (uint8_t)((  codepoint >> 12 ) | 0xe0);
+        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 6 ) & 0x3f) | 0x80);
+        dest[(*cur_pos)++] = (uint8_t)((  codepoint & 0x3f ) | 0x80);
      }
      else
      if ( *cur_pos + 3 < dest_size )
      {      
-     	dest[(*cur_pos)++] = (uint8_t)((  codepoint >> 18)           | 0xf0);
-        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 12) & 0x3f)   | 0x80);
-        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 6) & 0x3f)    | 0x80);
-        dest[(*cur_pos)++] = (uint8_t)((  codepoint & 0x3f)          | 0x80);
+     	dest[(*cur_pos)++] = (uint8_t)((  codepoint >> 18) | 0xf0);
+        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 12) & 0x3f) | 0x80);
+        dest[(*cur_pos)++] = (uint8_t)((( codepoint >> 6) & 0x3f) | 0x80);
+        dest[(*cur_pos)++] = (uint8_t)((  codepoint & 0x3f) | 0x80);
      }
      else 
      	return RET_BUFFER_OVERFLOW;
